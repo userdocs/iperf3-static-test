@@ -32,7 +32,8 @@ if [[ ${with_openssl} == 'yes' ]]; then
 	curl -sLO "https://github.com/openssl/openssl/releases/download/${openssl_version}/${openssl_version}.tar.gz"
 
 	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting zlib"
-	rm -rf "zlib" && tar xf "zlib.tar.xz"
+	rm -rf "zlib" && mkdir -p "zlib"
+	tar xf "zlib.tar.xz" --strip-components=1 -C "zlib"
 
 	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting openssl"
 	rm -rf "openssl" && mkdir -p "openssl"
@@ -62,11 +63,11 @@ fi
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m Cloning iperf3 git repo"
 
 [[ -d "$HOME/iperf3_build" ]] && rm -rf "$HOME/iperf3_build"
-printf '\n%b\n\n' " \e[94m\U25cf\e[0m git clone --no-tags --single-branch --branch ${source_branch} --shallow-submodules --recurse-submodules -j$(nproc) --depth 1 ${source_repo} $HOME/iperf3_build"
+printf '%b\n\n' " \e[94m\U25cf\e[0m git clone --no-tags --single-branch --branch ${source_branch} --shallow-submodules --recurse-submodules -j$(nproc) --depth 1 ${source_repo} $HOME/iperf3_build"
 git clone --no-tags --single-branch --branch "${source_branch}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "${source_repo}" "$HOME/iperf3_build"
 cd "$HOME/iperf3_build" || exit 1
 
-printf '\n%b\n\n' " \e[94m\U25cf\e[0m Repo Info"
+printf '%b\n\n' " \e[94m\U25cf\e[0m Repo Info"
 
 git remote show origin
 
