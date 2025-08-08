@@ -71,7 +71,7 @@ jobs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
+        uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5
         with:
           concurrent_skipping: "always"
           cancel_others: "false"
@@ -210,12 +210,12 @@ jobs:
       matrix:
         target: [macos-13, macos-latest]
         include:
-          - target: macos-13
-            binary_filename: amd64-osx-13
+          - target: macos-latest-large
+            binary_filename: amd64-osx
             brew_cellar: "/usr/local/Cellar"
             brew_install: "brew install automake"
           - target: macos-latest
-            binary_filename: arm64-osx-14
+            binary_filename: arm64-osx
             brew_cellar: "/opt/homebrew/Cellar"
             brew_install: "brew install autoconf automake libtool"
     uses: ./.github/workflows/ci-osx.yml
@@ -289,7 +289,7 @@ jobs:
       retries: ${{ github.event.inputs.retries || '1' }}
       distinct_id: ${{ github.event.inputs.distinct_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
       - name: ci-auto-rerun-failed-jobs via ${{ env.github_repo || github.repository }}
