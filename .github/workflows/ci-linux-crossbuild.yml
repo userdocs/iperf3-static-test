@@ -78,9 +78,9 @@ jobs:
           persist-credentials: false
 
       - name: Host - Bootstrap qemu
-        uses: userdocs/actions/qemu@e74d179578ddcf1cd07cd9eefd0915f33a3bd600 # v1.0.1
+        uses: userdocs/actions/qemu@b484dc40e7d71ce3203197cdbdf824b0d2469db4 # v1.0.4
 
-      - uses: userdocs/actions/qbt_docker@e74d179578ddcf1cd07cd9eefd0915f33a3bd600 # v1.0.1
+      - uses: userdocs/actions/qbt_docker@b484dc40e7d71ce3203197cdbdf824b0d2469db4 # v1.0.4
         with:
             # if the env.custom file exists, it will be used to pass environment
             distinct_id: ""
