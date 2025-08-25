@@ -71,8 +71,8 @@ jobs:
       - name: Host - Bootstrap docker container
         uses: userdocs/actions/qbt_docker@main
         with:
-            os_id: ghcr.io/userdocs/qbt-musl-cross-make
-            os_version_id: ${{ matrix.arch }}/${{ matrix.os_id }}
+            os_id: ${{ matrix.arch }}/${{ matrix.os_id }}
+            os_version_id: ${{ matrix.os_version_id }}
             additional_alpine_apps: >
               apk add build-base pkgconf autoconf automake curl libtool git tar curl perl openssl-dev openssl-libs-static linux-headers
             custom_docker_commands: |
