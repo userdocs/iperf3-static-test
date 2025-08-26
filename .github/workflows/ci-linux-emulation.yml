@@ -73,8 +73,8 @@ jobs:
         with:
             os_id: ${{ matrix.arch }}/${{ matrix.os_id }}
             os_version_id: ${{ matrix.os_version_id }}
-            platform: ${{ matrix.platform }}
-            additional_alpine_apps: >
+            # platform: ${{ matrix.platform }}
+            additional_apps: >
               build-base pkgconf autoconf automake curl libtool git tar curl perl openssl-dev openssl-libs-static linux-headers
             custom_docker_commands: |
               -e CPPFLAGS=-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3
