@@ -71,9 +71,9 @@ jobs:
       - name: Host - Bootstrap docker container
         uses: userdocs/actions/qbt_docker@main
         with:
-            os_id: ${{ matrix.os_id }}
+            os_id:   ${{ matrix.platform }}/${{ matrix.platform }}${{ matrix.os_id }}
             os_version_id: ${{ matrix.os_version_id }}
-            platform: ${{ matrix.platform }}
+            # platform: ${{ matrix.platform }}
             additional_alpine_apps: >
               build-base pkgconf autoconf automake curl libtool git tar curl perl openssl-dev openssl-libs-static linux-headers
             custom_docker_commands: |
