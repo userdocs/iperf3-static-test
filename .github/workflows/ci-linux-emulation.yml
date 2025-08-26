@@ -71,7 +71,7 @@ jobs:
       - name: Host - Bootstrap docker container
         uses: userdocs/actions/qbt_docker@main
         with:
-            os_id: ${{ matrix.os_id }}
+            os_id: ${{ matrix.arch }}/${{ matrix.os_id }}
             os_version_id: ${{ matrix.os_version_id }}
             platform: ${{ matrix.platform }}
             additional_alpine_apps: >
@@ -81,19 +81,19 @@ jobs:
               -e LDFLAGS=-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id
 
       - name: Git clone ${{ matrix.name }}
-        run: docker exec -u gh:gh ${container_name} git clone --no-tags --single-branch --branch "${source_branch}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "${source_repo}" /home/gh/${{ matrix.name }}
+        run: docker exec ${container_name} git clone --no-tags --single-branch --branch "${source_branch}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "${source_repo}" ${wd}/${{ matrix.name }}
 
       - name: Configure ${{ matrix.name }}
-        run: docker exec -u gh:gh -w /home/gh/${{ matrix.name }} ${container_name} ./configure --disable-shared --with-openssl=/usr --enable-static-bin --prefix=/home/gh
+        run: docker exec -w ${wd}/${{ matrix.name }} ${container_name} ./configure --disable-shared --with-openssl=/usr --enable-static-bin --prefix=${wd}
 
       - name: Make Build ${{ matrix.name }}
-        run: docker exec -u gh:gh -w /home/gh/${{ matrix.name }} ${container_name} make -j$(nproc)
+        run: docker exec -w ${wd}/${{ matrix.name }} ${container_name} make -j$(nproc)
 
       - name: Make Install Build ${{ matrix.name }}
-        run: docker exec -u gh:gh -w /home/gh/${{ matrix.name }} ${container_name} make install
+        run: docker exec -w ${wd}/${{ matrix.name }} ${container_name} make install
 
       - name: Rename ${{ matrix.name }} to ${{ matrix.name }}-${{ matrix.arch }}
-        run: docker exec -u gh:gh ${container_name} mv -f /home/gh/bin/${{ matrix.name }} /home/gh/${{ matrix.name }}-${{ matrix.arch }}
+        run: docker exec ${container_name} mv -f ${wd}/bin/${{ matrix.name }} ${wd}/${{ matrix.name }}-${{ matrix.arch }}
 
       - name: Create path to binary env
         run: printf '%s\n' "binary_path=${{ github.workspace }}/${{ matrix.name }}-${{ matrix.arch }}" >> $GITHUB_ENV
