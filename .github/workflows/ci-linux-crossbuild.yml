@@ -63,8 +63,8 @@ jobs:
 
     env:
       CDN: http://dl-cdn.alpinelinux.org/alpine/edge/main/
-      CPPFLAGS: "-I/home/gh/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
-      LDFLAGS: "-static --static -L/home/gh/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id"
+      CPPFLAGS: "-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
+      LDFLAGS: "-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id"
       source_repo: ${{ inputs.source_repo }}
       source_branch: ${{ inputs.source_branch }}
       container_name: builder
@@ -92,10 +92,10 @@ jobs:
               -e LDFLAGS=-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id
 
       - name: Run apk update
-        run: docker exec ${container_name} apk update
+        run: docker exec ${container_name} sudo apk update
 
       - name: Run apk upgrade
-        run: docker exec ${container_name} apk upgrade
+        run: docker exec ${container_name} sudo apk upgrade
 
       - name: Iperf3 - Install openssl-static dependencies
         run: |
@@ -114,19 +114,19 @@ jobs:
           tar -xzf "${openssl_libs_static}.apk" --strip-components=1 -C ${ws}/local
 
       - name: Git clone ${{ matrix.name }}
-        run: docker exec -u gh:gh ${container_name} git clone --no-tags --single-branch --branch "${source_branch}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "${source_repo}" /home/gh/${{ matrix.name }}
+        run: docker exec ${container_name} git clone --no-tags --single-branch --branch "${source_branch}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "${source_repo}" ${wd}/${{ matrix.name }}
 
       - name: Configure ${{ matrix.name }}
-        run: docker exec -u gh:gh -w /home/gh/${{ matrix.name }} ${container_name} ./configure --with-openssl="/home/gh/local" --disable-shared --enable-static-bin --prefix="/home/gh/local"
+        run: docker exec -w ${wd}/${{ matrix.name }} ${container_name} ./configure --with-openssl="${wd}/local" --disable-shared --enable-static-bin --prefix="${wd}/local"
 
       - name: Make Build ${{ matrix.name }}
-        run: docker exec -u gh:gh -w /home/gh/${{ matrix.name }} ${container_name} make -j$(nproc)
+        run: docker exec -w ${wd}/${{ matrix.name }} ${container_name} make -j$(nproc)
 
       - name: Make Install Build ${{ matrix.name }}
-        run: docker exec -u gh:gh -w /home/gh/${{ matrix.name }} ${container_name} make install
+        run: docker exec -w ${wd}/${{ matrix.name }} ${container_name} make install
 
       - name: Rename ${{ matrix.name }} to ${{ matrix.name }}-${{ matrix.release_name }}
-        run: docker exec -u gh:gh ${container_name} mv -f /home/gh/local/bin/${{ matrix.name }} /home/gh/${{ matrix.name }}-${{ matrix.release_name }}
+        run: docker exec ${container_name} mv -f ${wd}/local/bin/${{ matrix.name }} ${wd}/${{ matrix.name }}-${{ matrix.release_name }}
 
       - name: Create path to binary env
         run: printf '%s\n' "binary_path=${{ github.workspace }}/${{ matrix.name }}-${{ matrix.release_name }}" >> $GITHUB_ENV
