@@ -78,19 +78,18 @@ jobs:
           persist-credentials: false
 
       - name: Host - Bootstrap qemu
-        uses: userdocs/actions/qemu@e74d179578ddcf1cd07cd9eefd0915f33a3bd600 # v1.0.1
-
-      - uses: userdocs/actions/qbt_docker@e74d179578ddcf1cd07cd9eefd0915f33a3bd600 # v1.0.1
+        uses: userdocs/actions/qemu@main
         with:
-            # if the env.custom file exists, it will be used to pass environment
-            distinct_id: ""
-            use_host_env: "false"
-            container_name: ${{ env.container_name }}
+          target_arch: ${{ matrix.arch }}
+
+      - name: Host - Bootstrap docker container
+        uses: userdocs/actions/qbt_docker@main
+        with:
             os_id: ghcr.io/userdocs/musl-cross-make
             os_version_id: ${{ matrix.qbt-musl-cross-make }}
-            custom_docker_commands: "-e CPPFLAGS='${{ env.CPPFLAGS }}' -e LDFLAGS='${{ env.LDFLAGS }}'"
-            additional_alpine_apps: "bash curl git"
-            additional_debian_apps: "bash curl git"
+            custom_docker_commands: |
+              -e CPPFLAGS=-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3
+              -e LDFLAGS=-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id
 
       - name: Run apk update
         run: docker exec ${container_name} apk update
