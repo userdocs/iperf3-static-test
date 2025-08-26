@@ -14,7 +14,7 @@ on:
       skip_new_tag_check:
         description: "Bypass new tag check to force build?"
         required: true
-        default: false
+        default: true
         type: boolean
       linux_build_type:
         description: "Build Linux iperf3 via crossbuild"
@@ -24,7 +24,7 @@ on:
       artifacts_only:
         description: "Skip release - artifacts only"
         required: true
-        default: false
+        default: true
         type: boolean
       linux:
         description: "Skip Linux build"
@@ -35,16 +35,16 @@ on:
         description: "Skip Windows build"
         type: boolean
         required: true
-        default: false
+        default: true
       osx:
         description: "Skip OSX builds"
         type: boolean
         required: true
-        default: false
+        default: true
       skip_rerun:
         description: "Skip rerun?"
         required: true
-        default: false
+        default: true
         type: boolean
       retries:
         description: "Number of rerun retries"
