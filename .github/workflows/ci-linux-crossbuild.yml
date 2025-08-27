@@ -89,10 +89,10 @@ jobs:
               -e LDFLAGS=-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id
 
       - name: Run apk update
-        run: docker exec "${container_name}" sudo apk update
+        run: docker exec -u 0:0 "${container_name}" apk update
 
       - name: Run apk upgrade
-        run: docker exec "${container_name}" sudo apk upgrade
+        run: docker exec -u 0:0 "${container_name}" apk upgrade
 
       - name: Iperf3 - Install openssl-static dependencies
         run: |
