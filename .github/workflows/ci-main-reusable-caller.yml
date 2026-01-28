@@ -14,7 +14,6 @@ on:
       skip_new_tag_check:
         description: "Bypass new tag check to force build?"
         required: true
-        default: true
         type: boolean
       linux_build_type:
         description: "Build Linux iperf3 via crossbuild"
@@ -24,7 +23,6 @@ on:
       artifacts_only:
         description: "Skip release - artifacts only"
         required: true
-        default: true
         type: boolean
       linux:
         description: "Skip Linux build"
@@ -35,16 +33,13 @@ on:
         description: "Skip Windows build"
         type: boolean
         required: true
-        default: true
       osx:
         description: "Skip OSX builds"
         type: boolean
         required: true
-        default: true
       skip_rerun:
         description: "Skip rerun?"
         required: true
-        default: true
         type: boolean
       retries:
         description: "Number of rerun retries"
@@ -209,12 +204,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs_on: ["macos-13", "macos-14", "macos-15"]
+        runs_on: ["macos-14", "macos-15", "macos-15-intel"]
         include:
-          - runs_on: "macos-13"
-            binary_filename: amd64-osx-13
-            brew_cellar: "/usr/local/Cellar"
-            brew_install: "brew install automake"
           - runs_on: "macos-14"
             binary_filename: arm64-osx-14
             brew_cellar: "/opt/homebrew/Cellar"
@@ -223,6 +214,10 @@ jobs:
             binary_filename: arm64-osx-15
             brew_cellar: "/opt/homebrew/Cellar"
             brew_install: "brew install autoconf automake libtool"
+          - runs_on: "macos-15-intel"
+            binary_filename: amd64-osx-15
+            brew_cellar: "/usr/local/Cellar"
+            brew_install: "brew install automake"
     uses: ./.github/workflows/ci-osx.yml
     secrets:
       VT_API_KEY: ${{ secrets.VT_API_KEY }}
@@ -294,7 +289,7 @@ jobs:
       retries: ${{ github.event.inputs.retries || '1' }}
       distinct_id: ${{ github.event.inputs.distinct_id }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
       - name: ci-auto-rerun-failed-jobs via ${{ env.github_repo || github.repository }}
