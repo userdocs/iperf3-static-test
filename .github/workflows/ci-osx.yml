@@ -102,12 +102,12 @@ jobs:
       - name: Create path to binary env
         run: printf '%s\n' "binary_path=${{ github.workspace }}/iperf3-${binary_filename}" >> $GITHUB_ENV
 
-      - name: VirusTotal Scan
-        id: virustotal
-        uses: crazy-max/ghaction-virustotal@d34968c958ae283fe976efed637081b9f9dcf74f # v4.2.0
-        with:
-          vt_api_key: ${{ secrets.VT_API_KEY }}
-          files: ${{ env.binary_path }}
+      # - name: VirusTotal Scan
+      #   id: virustotal
+      #   uses: crazy-max/ghaction-virustotal@d34968c958ae283fe976efed637081b9f9dcf74f # v4.2.0
+      #   with:
+      #     vt_api_key: ${{ secrets.VT_API_KEY }}
+      #     files: ${{ env.binary_path }}
 
       - name: sha256sum
         run: |

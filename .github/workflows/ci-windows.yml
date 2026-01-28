@@ -63,14 +63,14 @@ jobs:
 
         run: .\cygwin\bin\bash.exe -l ci-windows-cygwin-build.sh "${{ matrix.openssl }}" "$env:cygwin_path" "$env:source_repo" "$env:source_branch"
 
-      - name: VirusTotal Scan
-        id: virustotal
-        uses: crazy-max/ghaction-virustotal@d34968c958ae283fe976efed637081b9f9dcf74f # v4.2.0
-        with:
-          vt_api_key: ${{ secrets.VT_API_KEY }}
-          files: |
-            ${{ matrix.name }}/bin/iperf3.exe
-            ${{ matrix.name }}/bin/cygwin1.dll
+      # - name: VirusTotal Scan
+      #   id: virustotal
+      #   uses: crazy-max/ghaction-virustotal@d34968c958ae283fe976efed637081b9f9dcf74f # v4.2.0
+      #   with:
+      #     vt_api_key: ${{ secrets.VT_API_KEY }}
+      #     files: |
+      #       ${{ matrix.name }}/bin/iperf3.exe
+      #       ${{ matrix.name }}/bin/cygwin1.dll
 
       - name: sha256sum
         run: |
