@@ -14,8 +14,8 @@ on:
       skip_new_tag_check:
         description: "Bypass new tag check to force build?"
         required: true
+        default: false
         type: boolean
-        default: true
       linux_build_type:
         description: "Build Linux iperf3 via crossbuild"
         required: true
@@ -24,8 +24,8 @@ on:
       artifacts_only:
         description: "Skip release - artifacts only"
         required: true
+        default: false
         type: boolean
-        default: true
       linux:
         description: "Skip Linux build"
         type: boolean
@@ -44,8 +44,8 @@ on:
       skip_rerun:
         description: "Skip rerun?"
         required: true
+        default: false
         type: boolean
-        default: true
       retries:
         description: "Number of rerun retries"
         required: true
@@ -53,8 +53,8 @@ on:
         type: choice
         options: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
-  # schedule:
-  #   - cron: "*/5 * * * *" # every 5 minutes
+  schedule:
+    - cron: "*/5 * * * *" # every 5 minutes
 
 permissions: {}
 

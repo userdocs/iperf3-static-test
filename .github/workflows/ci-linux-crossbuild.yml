@@ -83,6 +83,8 @@ jobs:
         with:
           os_id: ghcr.io/userdocs/musl-cross-make
           os_version_id: ${{ matrix.qbt-musl-cross-make }}
+          additional_apps: >
+            build-base pkgconf autoconf automake curl libtool git grep tar curl perl openssl-dev openssl-libs-static linux-headers
           custom_docker_commands: |
             -e CPPFLAGS=-I${wd}/local/include -I/usr/include/fortify -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3
             -e LDFLAGS=-static --static -L${wd}/local/lib -Wl,-O1,--as-needed,--sort-common,-z,nodlopen,-z,noexecstack,-z,now,-z,relro,-z,--no-copy-dt-needed-entries,--build-id
@@ -121,12 +123,12 @@ jobs:
       - name: Create path to binary env
         run: printf '%s\n' "binary_path=${{ github.workspace }}/${{ matrix.name }}-${{ matrix.release_name }}" >> $GITHUB_ENV
 
-      - name: VirusTotal Scan
-        id: virustotal
-        uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2 # v5.0.0
-        with:
-          vt_api_key: ${{ secrets.VT_API_KEY }}
-          files: ${{ env.binary_path }}
+      # - name: VirusTotal Scan
+      #   id: virustotal
+      #   uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2 # v5.0.0
+      #   with:
+      #     vt_api_key: ${{ secrets.VT_API_KEY }}
+      #     files: ${{ env.binary_path }}
 
       - name: sha256sum
         run: |
