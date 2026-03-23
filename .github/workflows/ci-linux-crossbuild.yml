@@ -22,6 +22,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-24.04-arm
+    environment: production
     outputs:
       release_tags: ${{ steps.release_tags.outputs.release_tag }}
     strategy:
@@ -58,30 +59,6 @@ jobs:
           - arch: s390x
             qbt-musl-cross-make: "s390x-linux-musl"
             release_name: s390x
-          - arch: arm
-            qbt-musl-cross-make: "arm-linux-musleabi"
-            release_name: arm
-          - arch: armhf
-            qbt-musl-cross-make: "arm-linux-musleabihf"
-            release_name: armhf
-          - arch: mips
-            qbt-musl-cross-make: "mips-linux-musl"
-            release_name: mips
-          - arch: mipsel
-            qbt-musl-cross-make: "mipsel-linux-musl"
-            release_name: mipsel
-          - arch: mips64
-            qbt-musl-cross-make: "mips64-linux-musl"
-            release_name: mips64
-          - arch: mips64el
-            qbt-musl-cross-make: "mips64el-linux-musl"
-            release_name: mips64el
-          - arch: powerpc
-            qbt-musl-cross-make: "powerpc-linux-musl"
-            release_name: powerpc
-          - arch: loongarch64
-            qbt-musl-cross-make: "loongarch64-linux-musl"
-            release_name: loongarch64
 
     name: ${{ matrix.name }} ${{ matrix.os_id }}:${{ matrix.os_version_id }} ${{ matrix.arch }}
 
