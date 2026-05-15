@@ -114,6 +114,10 @@ jobs:
       - name: Configure ${{ matrix.name }}
         run: docker exec -w "${wd}/${{ matrix.name }}" "${container_name}" ./configure --with-openssl="${wd}/local" --disable-shared --enable-static-bin --prefix="${wd}/local"
 
+      - name: Configure ${{ matrix.name }}
+        if: failure()
+        run: docker exec -w "${wd}/${{ matrix.name }}" "${container_name}" cat ./config.log
+
       - name: Make Build ${{ matrix.name }}
         run: docker exec -w "${wd}/${{ matrix.name }}" "${container_name}" make -j$(nproc)
 
