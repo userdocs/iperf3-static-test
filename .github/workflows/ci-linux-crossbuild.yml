@@ -33,32 +33,57 @@ jobs:
         os_version_id: [edge]
         arch: [x86, x86_64, armhf, armv7, aarch64, ppc64le, riscv64, s390x]
         include:
+          - arch: aarch64
+            musl-cross-make: "aarch64-linux-musl"
+            release_name: arm64v8
+          - arch: arm
+            musl-cross-make: "arm-linux-musleabi"
+            release_name: arm32v5
+          - arch: armhf
+            musl-cross-make: "armv6-linux-musleabihf"
+            release_name: arm32v6
+          - arch: armv7
+            musl-cross-make: "armv7l-linux-musleabihf"
+            release_name: arm32v7
+
           - arch: x86
             musl-cross-make: "i686-linux-musl"
             release_name: i386
           - arch: x86_64
             musl-cross-make: "x86_64-linux-musl"
             release_name: amd64
-          - arch: armhf
-            musl-cross-make: "armv6-linux-musleabihf"
-            release_name: arm32v6
-          - arch: armv7
-            musl-cross-make: "armv6-linux-musleabihf"
-            release_name: arm32v7
-          - arch: armv7
-            musl-cross-make: "armv7l-linux-musleabihf"
-          - arch: aarch64
-            musl-cross-make: "aarch64-linux-musl"
-            release_name: arm64v8
+
+          - arch: mips
+            musl-cross-make: "mips-linux-musl"
+            release_name: mips
+          - arch: mipsel
+            musl-cross-make: "mipsel-linux-musl"
+            release_name: mipsel
+          - arch: mips64
+            musl-cross-make: "mips64-linux-musl"
+            release_name: mips64
+          - arch: mips64el
+            musl-cross-make: "mips64el-linux-musl"
+            release_name: mips64el
+
+          - arch: powerpc
+            musl-cross-make: "powerpc-linux-musl"
+            release_name: powerpc
           - arch: ppc64le
             musl-cross-make: "powerpc64le-linux-musl"
             release_name: ppc64le
-          - arch: riscv64
-            musl-cross-make: "riscv64-linux-musl"
-            release_name: riscv64
+
           - arch: s390x
             musl-cross-make: "s390x-linux-musl"
             release_name: s390x
+
+          - arch: riscv64
+            musl-cross-make: "riscv64-linux-musl"
+            release_name: riscv64
+
+          - arch: loongarch64
+            musl-cross-make: "loongarch64-linux-musl"
+            release_name: loongarch64
 
     name: ${{ matrix.name }} ${{ matrix.os_id }}:${{ matrix.os_version_id }} ${{ matrix.arch }}
 
