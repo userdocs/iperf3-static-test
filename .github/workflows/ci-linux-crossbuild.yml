@@ -113,25 +113,14 @@ jobs:
 
       - name: Iperf3 - Install openssl-static dependencies
         run: |
-          docker exec "${container_name}" cat /etc/apk/repositories > repositories.txt
-          # checking if the containers is latest or edge so that we get the correct openssl libs
-          cdn_repo="$(cat repositories.txt | sed -rn 's|https://dl-cdn.alpinelinux.org/alpine/(.*)/(.*)|\1|p' | head -1)"
-          # Getting openssl packages info for the current arch and release
-          openssl_libs_static=$(docker exec "${container_name}" sh -c "apk info openssl-libs-static | head -1 | awk '{ print \$1 }'")
-          openssl_dev=$(docker exec "${container_name}" sh -c "apk info openssl-dev | head -1 | awk '{ print \$1 }'")
-          # Downloading the openssl packages for the current arch and release
-          curl -sLO "https://dl-cdn.alpinelinux.org/alpine/${cdn_repo}/main/${arch}/${openssl_dev}.apk"
-          curl -sLO "https://dl-cdn.alpinelinux.org/alpine/${cdn_repo}/main/${arch}/${openssl_libs_static}.apk"
-          # Extracting the openssl packages
-          mkdir -p "${ws}/local"
-          tar -xzf "${openssl_dev}.apk" --strip-components=1 -C "${ws}/local"
-          tar -xzf "${openssl_libs_static}.apk" --strip-components=1 -C "${ws}/local"
+          curl -sLO "https://github.com/userdocs/openssl/releases/latest/download/${{ matrix.musl-cross-make }}.tar.xz"
+          docker exec "${container_name}" tar -xf "${wd}/${{ matrix.musl-cross-make }}.tar.xz" -C /usr/local
 
       - name: Git clone ${{ matrix.name }}
         run: docker exec "${container_name}" git clone --no-tags --single-branch --branch "${source_branch}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "${source_repo}" ${wd}/${{ matrix.name }}
 
       - name: Configure ${{ matrix.name }}
-        run: docker exec -w "${wd}/${{ matrix.name }}" "${container_name}" ./configure --with-openssl="${wd}/local" --disable-shared --enable-static-bin --prefix="${wd}/local"
+        run: docker exec -w "${wd}/${{ matrix.name }}" "${container_name}" ./configure --with-openssl="/usr/local" --disable-shared --enable-static-bin --prefix="${wd}/local"
 
       - name: Configure ${{ matrix.name }}
         if: failure()
