@@ -44,14 +44,12 @@ jobs:
           - arch: armv7
             musl-cross-make: "armv7l-linux-musleabihf"
             release_name: arm32v7
-
           - arch: x86
             musl-cross-make: "i686-linux-musl"
             release_name: i386
           - arch: x86_64
             musl-cross-make: "x86_64-linux-musl"
             release_name: amd64
-
           - arch: mips
             musl-cross-make: "mips-linux-musl"
             release_name: mips
@@ -64,22 +62,18 @@ jobs:
           - arch: mips64el
             musl-cross-make: "mips64el-linux-musl"
             release_name: mips64el
-
           - arch: powerpc
             musl-cross-make: "powerpc-linux-musl"
             release_name: powerpc
           - arch: ppc64le
             musl-cross-make: "powerpc64le-linux-musl"
             release_name: ppc64le
-
           - arch: s390x
             musl-cross-make: "s390x-linux-musl"
             release_name: s390x
-
           - arch: riscv64
             musl-cross-make: "riscv64-linux-musl"
             release_name: riscv64
-
           - arch: loongarch64
             musl-cross-make: "loongarch64-linux-musl"
             release_name: loongarch64
