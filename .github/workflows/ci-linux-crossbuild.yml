@@ -31,7 +31,6 @@ jobs:
         name: [iperf3]
         os_id: [alpine]
         os_version_id: [edge]
-        arch: [aarch64, arm, armhf, armv7, x86, x86_64, mips, mipsel, mips64, mips64el, powerpc, ppc64le, s390x, riscv64, loongarch64]
         include:
           - arch: aarch64
             musl-cross-make: "aarch64-linux-musl"
