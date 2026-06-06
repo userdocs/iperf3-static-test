@@ -19,7 +19,7 @@ on:
       linux_build_type:
         description: "Build Linux iperf3 via crossbuild"
         required: true
-        default: false
+        default: true
         type: boolean
       artifacts_only:
         description: "Skip release - artifacts only"
@@ -101,7 +101,7 @@ jobs:
       source_branch: ${{ github.event.inputs.source_branch || 'master' }}
       artifacts_only: ${{ github.event.inputs.artifacts_only || 'false' }}
       skip_new_tag_check: ${{ github.event.inputs.skip_new_tag_check || 'false'  }}
-      linux_build_type: ${{ github.event.inputs.linux_build_type || 'false' }}
+      linux_build_type: ${{ github.event.inputs.linux_build_type || 'true' }}
       linux: ${{ github.event.inputs.linux || 'false' }}
       windows: ${{ github.event.inputs.windows || 'false' }}
       osx: ${{ github.event.inputs.osx || 'false' }}
