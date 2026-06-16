@@ -99,7 +99,7 @@ jobs:
           target_arch: ${{ matrix.arch }}
 
       - name: Host - Bootstrap docker container
-        uses: userdocs/actions/qbt_docker@main # v1.0.7
+        uses: userdocs/actions/qbt_docker@54bc220493de04a26760ecc1e49732025ead49cb # main
         with:
           os_id: ghcr.io/userdocs/musl-cross-make
           os_version_id: ${{ matrix.musl-cross-make }}
