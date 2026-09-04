@@ -1,1 +1,1 @@
-automake,curl,gcc-core,gcc-g++,git,libtool,make,pkg-config,tar,zlib-devel
+automake,curl,cygport,gcc-core,gcc-g++,git,libtool,make,pkg-config,tar,zlib-devel
