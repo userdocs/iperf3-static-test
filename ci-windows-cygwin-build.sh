@@ -1,67 +1,95 @@
-#!/bin/bash
-# Exit immediately if a command exits with a non-zero status
-set -e
+#!/usr/bin/env bash
 
-TARGET_VERSION="3.5.8"
-REPO_DIR="openssl"
-
-echo "==> Cloning Cygwin OpenSSL repository (with submodules)..."
-if [ ! -d "$REPO_DIR" ]; then
-    git clone --recurse-submodules https://cygwin.com/git/cygwin-packages/openssl.git "$REPO_DIR"
+HOME="$(pwd)"
+with_openssl="${1:-no}"
+if [[ ${2} =~ ^/ ]]; then
+	cygwin_path="${2}"
 else
-    echo "Directory $REPO_DIR already exists. Pulling latest changes..."
-    cd "$REPO_DIR"
-    git checkout -- .
-    git pull
-    git submodule update --init --recursive
-    cd ..
+	cygwin_path="${HOME}/${2:-cygwin}"
+fi
+source_repo="${3:-https://github.com/esnet/iperf.git}"
+source_branch="${4:-master}"
+
+printf '\n%b\n' " \e[93m\U25cf\e[0m With openssl = ${with_openssl}"
+printf '%b\n' " \e[93m\U25cf\e[0m Build path = ${HOME}"
+printf '%b\n' " \e[93m\U25cf\e[0m Cygwin path = ${cygwin_path}"
+
+printf '\n%b\n' " \e[93m\U25cf\e[0m parameters = ${*}"
+
+printf '\n%b\n' " \e[93m\U25cf\e[0m with_openssl = ${with_openssl}"
+printf '\n%b\n' " \e[93m\U25cf\e[0m cygwin_path = ${cygwin_path}"
+printf '\n%b\n' " \e[93m\U25cf\e[0m source_repo = ${source_repo}"
+printf '\n%b\n' " \e[93m\U25cf\e[0m source_branch = ${source_branch}"
+
+if [[ ${with_openssl} == 'yes' ]]; then
+	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading zlib"
+	curl -sLO "https://github.com/userdocs/qbt-workflow-files/releases/latest/download/zlib.tar.xz"
+
+	# Version 3.0 will be supported until 2026-09-07 (LTS). 3.1 is EOL https://openssl-library.org/policies/releasestrat/index.html
+	openssl_version="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl-3\.0\./{sub("refs/tags/", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+
+	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading openssl ${openssl_version}"
+	curl -sLO "https://github.com/openssl/openssl/releases/download/${openssl_version}/${openssl_version}.tar.gz"
+
+	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting zlib"
+	rm -rf "zlib" && mkdir -p "zlib"
+	tar xf "zlib.tar.xz" --strip-components=1 -C "zlib"
+
+	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting openssl"
+	rm -rf "openssl" && mkdir -p "openssl"
+	tar xf "${openssl_version}.tar.gz" --strip-components=1 -C "openssl"
+
+	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring zlib"
+	pushd "zlib" || exit 1
+	./configure --prefix="${cygwin_path}" --static --zlib-compat
+
+	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building with zlib"
+	make -j"$(nproc)"
+	make install
+
+	popd || exit 1
+
+	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring openssl"
+	pushd "${HOME}/openssl" || exit 1
+	./config --prefix="${cygwin_path}" --libdir=lib threads no-shared no-dso no-comp
+
+	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building openssl"
+	make -j"$(nproc)"
+	make install_sw
+
+	popd || exit 1
 fi
 
-cd "$REPO_DIR"
+printf '\n%b\n\n' " \e[94m\U25cf\e[0m Cloning iperf3 git repo"
 
-echo "==> Cleaning any previous builds..."
-cygport openssl.cygport clean || true
+[[ -d "$HOME/iperf3_build" ]] && rm -rf "$HOME/iperf3_build"
+printf '%b\n\n' " \e[94m\U25cf\e[0m git clone --no-tags --single-branch --branch ${source_branch} --shallow-submodules --recurse-submodules -j$(nproc) --depth 1 ${source_repo} $HOME/iperf3_build"
+git clone --no-tags --single-branch --branch "${source_branch}" --shallow-submodules --recurse-submodules -j"$(nproc)" --depth 1 "${source_repo}" "$HOME/iperf3_build"
+cd "$HOME/iperf3_build" || exit 1
 
-echo "==> Modifying openssl.cygport for v$TARGET_VERSION (/usr/local Fully Static Build)..."
+printf '%b\n\n' " \e[94m\U25cf\e[0m Repo Info"
 
-# 1. Bump the version
-sed -i "s/^VERSION=.*/VERSION=$TARGET_VERSION/" openssl.cygport
+git remote show origin
 
-# 2. Dynamically set and uncomment MAKEOPTS using the host's actual core count
-CPU_CORES=$(nproc)
-sed -i 's|.*MAKEOPTS+=.*|MAKEOPTS+=" -j'"$CPU_CORES"'"|g' openssl.cygport
+printf '\n%b\n' " \e[92m\U25cf\e[0m Setting iperf3 version to file iperf3_version"
+sed -rn 's|(.*)\[(.*)],\[https://github.com/esnet/iperf],(.*)|\2|p' configure.ac > "$HOME/iperf3_version"
 
-# 3. Switch build configuration to fully static (no-shared, no-dso, no-comp)
-sed -i 's/\<shared\>/no-shared no-dso no-comp/g' openssl.cygport
+printf '\n%b\n\n' " \e[94m\U25cf\e[0m Bootstrapping iperf3"
 
-# 4. Safely update any path starting with 'usr/' to 'usr/local/' (handles prefix, contents, and install moves)
-sed -i 's|\busr/|usr/local/|g' openssl.cygport
+./bootstrap.sh
 
-# 5. Remove libssl3 from PKG_NAMES and clean up any orphaned runtime blocks if present
-sed -i 's/libssl3//g' openssl.cygport
-sed -i '/^libssl3_/d' openssl.cygport
-sed -i '/^_CATEGORY=/d' openssl.cygport
-sed -i '/^_SUMMARY=/d' openssl.cygport
-sed -i '/^_REQUIRES=/d' openssl.cygport
-sed -i '/^_CONTENTS=/,/^"/d' openssl.cygport
+printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring iperf3"
+./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
 
-# 6. Remove non-existent dynamic import libs (.dll.a) and ensure static libraries (.a) are present in devel contents
-sed -i '/libcrypto\.dll\.a/d' openssl.cygport
-sed -i '/libssl\.dll\.a/d' openssl.cygport
-if ! grep -q "libcrypto\.a" openssl.cygport; then
-    sed -i 's|usr/local/include/openssl/|usr/local/include/openssl/\n  usr/local/lib/libcrypto.a\n  usr/local/lib/libssl.a|' openssl.cygport
+printf '\n%b\n\n' " \e[94m\U25cf\e[0m make"
+make -j"$(nproc)"
+
+printf '\n%b\n\n' " \e[94m\U25cf\e[0m make install"
+[[ -d "$HOME/iperf3" ]] && rm -rf "$HOME/iperf3"
+make install
+
+if [[ -d "$HOME/iperf3/bin" ]]; then
+	printf '\n%b\n' " \e[94m\U25cf\e[0m Copy dll dependencies"
+	[[ -f "${cygwin_path}/bin/cygwin1.dll" ]] && cp -f "${cygwin_path}/bin/cygwin1.dll" "$HOME/iperf3/bin"
+	printf '\n%b\n' " \e[92m\U25cf\e[0m Copied the dll dependencies"
 fi
-
-# 7. Ensure static libraries are not deleted in src_install() and clean up old dll chmod commands
-sed -i 's|rm \${D}/usr/lib/lib{crypto,ssl}\.a|# &|' openssl.cygport
-sed -i '/chmod 0755 \${D}\/usr\/local\/bin\/\*\.dll/d' openssl.cygport
-
-echo "==> Starting cygport /usr/local static build pipeline with $CPU_CORES cores..."
-cygport openssl.cygport fetch prep compile install package
-
-echo "==> Automatically installing packages to /usr/local..."
-tar -xvf libssl-devel-*.tar.xz -C /
-tar -xvf openssl-*.tar.xz -C /
-tar -xvf openssl-perl-*.tar.xz -C /
-
-echo "==> Success! OpenSSL built, packaged, and installed locally to /usr/local."
