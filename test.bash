@@ -22,7 +22,7 @@ cd "$REPO_DIR"
 echo "==> Cleaning any previous builds..."
 cygport openssl.cygport clean || true
 
-echo "==> Modifying openssl.cygport for v$TARGET_VERSION (/usr/local Static Build)..."
+echo "==> Modifying openssl.cygport for v$TARGET_VERSION (/usr/local Fully Static Build)..."
 
 # 1. Bump the version
 sed -i "s/^VERSION=.*/VERSION=$TARGET_VERSION/" openssl.cygport
@@ -67,4 +67,9 @@ sed -i '/chmod 0755 \${D}\/usr\/bin\/\*\.dll/d' openssl.cygport
 echo "==> Starting cygport /usr/local static build pipeline with $CPU_CORES cores..."
 cygport openssl.cygport fetch prep compile install package
 
-echo "==> Success! Your /usr/local static OpenSSL packages are located in the $PWD directory."
+echo "==> Automatically installing packages to /usr/local..."
+tar -xvf libssl-devel-*.tar.xz -C /
+tar -xvf openssl-*.tar.xz -C /
+tar -xvf openssl-perl-*.tar.xz -C /
+
+echo "==> Success! OpenSSL built, packaged, and installed locally to /usr/local."
