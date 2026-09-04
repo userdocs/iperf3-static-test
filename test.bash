@@ -22,7 +22,7 @@ cd "$REPO_DIR"
 echo "==> Cleaning any previous builds..."
 cygport openssl.cygport clean || true
 
-echo "==> Modifying openssl.cygport for v$TARGET_VERSION (Fully Static Build)..."
+echo "==> Modifying openssl.cygport for v$TARGET_VERSION (/usr/local Static Build)..."
 
 # 1. Bump the version
 sed -i "s/^VERSION=.*/VERSION=$TARGET_VERSION/" openssl.cygport
@@ -31,8 +31,9 @@ sed -i "s/^VERSION=.*/VERSION=$TARGET_VERSION/" openssl.cygport
 CPU_CORES=$(nproc)
 sed -i 's|.*MAKEOPTS+=.*|MAKEOPTS+=" -j'"$CPU_CORES"'"|g' openssl.cygport
 
-# 3. Switch build configuration to fully static (no-shared, no-dso, no-comp)
+# 3. Switch build configuration to fully static and target /usr/local
 sed -i 's/\<shared\>/no-shared no-dso no-comp/g' openssl.cygport
+sed -i 's|--prefix=/usr|--prefix=/usr/local|g' openssl.cygport
 
 # 4. Remove libssl3 from PKG_NAMES and clean up any orphaned runtime blocks if present
 sed -i 's/libssl3//g' openssl.cygport
@@ -46,16 +47,24 @@ sed -i '/^_CONTENTS=/,/^"/d' openssl.cygport
 sed -i '/libcrypto\.dll\.a/d' openssl.cygport
 sed -i '/libssl\.dll\.a/d' openssl.cygport
 
-# 6. Ensure static libraries (*.a) are explicitly in libssl_devel_CONTENTS
-if ! grep -q "libcrypto\.a" openssl.cygport; then
-    sed -i 's|usr/include/openssl/|usr/include/openssl/\n  usr/lib/libcrypto.a\n  usr/lib/libssl.a|' openssl.cygport
-fi
+# 6. Adjust devel package contents paths to match /usr/local layout
+sed -i 's|usr/include/openssl/|usr/local/include/openssl/\n  usr/local/lib/libcrypto.a\n  usr/local/lib/libssl.a|' openssl.cygport
+sed -i 's|usr/lib/libcrypto\.a|# &|' openssl.cygport # Prevent duplicates if re-run
+sed -i 's|usr/lib/libssl\.a|# &|' openssl.cygport
 
-# 7. Ensure static libraries are not deleted in src_install() and clean up any old dll chmod commands
+# Fix other paths in devel package to point to usr/local
+sed -i 's|usr/lib/cmake/\*|usr/local/lib/cmake/*|g' openssl.cygport
+sed -i 's|usr/lib/pkgconfig/\*|usr/local/lib/pkgconfig/*|g' openssl.cygport
+sed -i 's|usr/share/man/man3/|usr/local/share/man/man3/|g' openssl.cygport
+
+# 7. Update main openssl binary path target to /usr/local/bin if applicable
+sed -i 's|usr/bin/openssl\.exe|usr/local/bin/openssl.exe|g' openssl.cygport
+
+# 8. Ensure static libraries are not deleted in src_install() and clean up any old dll chmod commands
 sed -i 's|rm \${D}/usr/lib/lib{crypto,ssl}\.a|# &|' openssl.cygport
 sed -i '/chmod 0755 \${D}\/usr\/bin\/\*\.dll/d' openssl.cygport
 
-echo "==> Starting cygport static build pipeline with $CPU_CORES cores..."
+echo "==> Starting cygport /usr/local static build pipeline with $CPU_CORES cores..."
 cygport openssl.cygport fetch prep compile install package
 
-echo "==> Success! Your static OpenSSL packages are located in the $PWD directory."
+echo "==> Success! Your /usr/local static OpenSSL packages are located in the $PWD directory."
