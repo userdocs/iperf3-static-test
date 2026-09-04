@@ -87,8 +87,6 @@ else
 	./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
 fi
 
-cat config.log
-
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m make"
 make -j"$(nproc)"
 
