@@ -62,7 +62,7 @@ jobs:
 
       - name: Build static openssl
         if: matrix.build == 'openssl'
-        run: .\cygwin\bin\bash.exe -l test.sh
+        run: .\cygwin\bin\bash.exe -l test.bash
 
       - name: Build static
 
