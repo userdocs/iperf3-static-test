@@ -78,8 +78,11 @@ printf '\n%b\n\n' " \e[94m\U25cf\e[0m Bootstrapping iperf3"
 
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring iperf3"
 if [[ ${with_openssl} == 'yes' ]]; then
-	# static openssl pulls in the windows cert store (winstore_store.c), which needs crypt32
-	OPENSSL_LIBS="-lssl -lcrypto -lcrypt32" ./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
+	# AX_CHECK_OPENSSL prefers pkg-config over the OPENSSL_LIBS env var, dropping any
+	# override, so the extra lib has to ride in via LIBS instead (it gets appended
+	# after OPENSSL_LIBS by the macro: LIBS="$OPENSSL_LIBS $LIBS").
+	# static openssl 3.5+ pulls in the windows cert store (winstore_store.c), which needs crypt32
+	LIBS="-lcrypt32" ./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
 else
 	./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
 fi
