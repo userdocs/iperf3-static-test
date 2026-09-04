@@ -26,7 +26,7 @@ if [[ ${with_openssl} == 'yes' ]]; then
 	curl -sLO "https://github.com/userdocs/qbt-workflow-files/releases/latest/download/zlib.tar.xz"
 
 	# Version 3.0 will be supported until 2026-09-07 (LTS). 3.1 is EOL https://openssl-library.org/policies/releasestrat/index.html
-	openssl_version="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl-3\.0\./{sub("refs/tags/", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+	openssl_version="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl-3\.5\./{sub("refs/tags/", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
 
 	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading openssl ${openssl_version}"
 	curl -sLO "https://github.com/openssl/openssl/releases/download/${openssl_version}/${openssl_version}.tar.gz"
