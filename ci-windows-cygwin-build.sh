@@ -16,7 +16,6 @@ printf '%b\n' " \e[93m\U25cf\e[0m Cygwin path = ${cygwin_path}"
 
 printf '\n%b\n' " \e[93m\U25cf\e[0m parameters = ${*}"
 
-printf '\n%b\n' " \e[93m\U25cf\e[0m with_openssl = ${with_openssl}"
 printf '\n%b\n' " \e[93m\U25cf\e[0m cygwin_path = ${cygwin_path}"
 printf '\n%b\n' " \e[93m\U25cf\e[0m source_repo = ${source_repo}"
 printf '\n%b\n' " \e[93m\U25cf\e[0m source_branch = ${source_branch}"
@@ -25,7 +24,6 @@ if [[ ${with_openssl} == 'yes' ]]; then
 	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading zlib"
 	curl -sLO "https://github.com/userdocs/qbt-workflow-files/releases/latest/download/zlib.tar.xz"
 
-	# Version 3.0 will be supported until 2026-09-07 (LTS). 3.1 is EOL https://openssl-library.org/policies/releasestrat/index.html
 	openssl_version="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl-3\.5\./{sub("refs/tags/", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
 
 	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading openssl ${openssl_version}"
@@ -79,7 +77,12 @@ printf '\n%b\n\n' " \e[94m\U25cf\e[0m Bootstrapping iperf3"
 ./bootstrap.sh
 
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring iperf3"
-./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
+if [[ ${with_openssl} == 'yes' ]]; then
+	# static openssl pulls in the windows cert store (winstore_store.c), which needs crypt32
+	OPENSSL_LIBS="-lssl -lcrypto -lcrypt32" ./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
+else
+	./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
+fi
 
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m make"
 make -j"$(nproc)"
