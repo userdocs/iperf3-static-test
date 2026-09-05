@@ -20,44 +20,44 @@ printf '\n%b\n' " \e[93m\U25cf\e[0m cygwin_path = ${cygwin_path}"
 printf '\n%b\n' " \e[93m\U25cf\e[0m source_repo = ${source_repo}"
 printf '\n%b\n' " \e[93m\U25cf\e[0m source_branch = ${source_branch}"
 
-if [[ ${with_openssl} == 'yes' ]]; then
-	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading zlib"
-	curl -sLO "https://github.com/userdocs/qbt-workflow-files/releases/latest/download/zlib.tar.xz"
+# if [[ ${with_openssl} == 'yes' ]]; then
+# 	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading zlib"
+# 	curl -sLO "https://github.com/userdocs/qbt-workflow-files/releases/latest/download/zlib.tar.xz"
 
-	openssl_version="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl-3\.5\./{sub("refs/tags/", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+# 	openssl_version="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl-3\.5\./{sub("refs/tags/", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
 
-	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading openssl ${openssl_version}"
-	curl -sLO "https://github.com/openssl/openssl/releases/download/${openssl_version}/${openssl_version}.tar.gz"
+# 	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading openssl ${openssl_version}"
+# 	curl -sLO "https://github.com/openssl/openssl/releases/download/${openssl_version}/${openssl_version}.tar.gz"
 
-	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting zlib"
-	rm -rf "zlib" && mkdir -p "zlib"
-	tar xf "zlib.tar.xz" --strip-components=1 -C "zlib"
+# 	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting zlib"
+# 	rm -rf "zlib" && mkdir -p "zlib"
+# 	tar xf "zlib.tar.xz" --strip-components=1 -C "zlib"
 
-	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting openssl"
-	rm -rf "openssl" && mkdir -p "openssl"
-	tar xf "${openssl_version}.tar.gz" --strip-components=1 -C "openssl"
+# 	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting openssl"
+# 	rm -rf "openssl" && mkdir -p "openssl"
+# 	tar xf "${openssl_version}.tar.gz" --strip-components=1 -C "openssl"
 
-	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring zlib"
-	pushd "zlib" || exit 1
-	./configure --prefix="${cygwin_path}" --static
+# 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring zlib"
+# 	pushd "zlib" || exit 1
+# 	./configure --prefix="${cygwin_path}" --static
 
-	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building with zlib"
-	make -j"$(nproc)"
-	make install
+# 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building with zlib"
+# 	make -j"$(nproc)"
+# 	make install
 
-	popd || exit 1
+# 	popd || exit 1
 
-	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring openssl"
-	pushd "${HOME}/openssl" || exit 1
-	./config --prefix="${cygwin_path}" --libdir=lib threads no-shared no-dso no-comp zlib \
-		--with-zlib-lib="${cygwin_path}/lib" --with-zlib-include="${cygwin_path}/include"
+# 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring openssl"
+# 	pushd "${HOME}/openssl" || exit 1
+# 	./config --prefix="${cygwin_path}" --libdir=lib threads no-shared no-dso no-comp zlib \
+# 		--with-zlib-lib="${cygwin_path}/lib" --with-zlib-include="${cygwin_path}/include"
 
-	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building openssl"
-	make -j"$(nproc)"
-	make install_sw
+# 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building openssl"
+# 	make -j"$(nproc)"
+# 	make install_sw
 
-	popd || exit 1
-fi
+# 	popd || exit 1
+# fi
 
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m Cloning iperf3 git repo"
 
