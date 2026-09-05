@@ -73,12 +73,18 @@ sed -i '/usr\/share\/man\/man\[157\]/d' openssl.cygport
 sed -i '/usr\/local\/share\/man\/man3\//d' openssl.cygport
 sed -i '/usr\/share\/man\/man1\/\(CA\.pl\|c_rehash\|tsget\)\.1\*/d' openssl.cygport
 
+# 11. Drop the openssl-perl subpackage - a Fedora patch skips installing CA.pl/tsget/c_rehash
+# without docs (which we intentionally skip), so this subpackage can never be populated.
+sed -i 's/openssl-perl//g' openssl.cygport
+sed -i '/^openssl_perl_SUMMARY=/d' openssl.cygport
+sed -i '/^openssl_perl_REQUIRES=/d' openssl.cygport
+sed -i '/^openssl_perl_CONTENTS=/,/^"/d' openssl.cygport
+
 echo "==> Starting cygport /usr/local static build pipeline with $CPU_CORES cores..."
 cygport openssl.cygport fetch prep compile install package
 
 echo "==> Automatically installing packages to /usr/local..."
 tar -xvf libssl-devel-*.tar.xz -C /
 tar -xvf openssl-*.tar.xz -C /
-tar -xvf openssl-perl-*.tar.xz -C /
 
 echo "==> Success! OpenSSL built, packaged, and installed locally to /usr/local."
