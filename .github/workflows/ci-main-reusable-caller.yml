@@ -251,7 +251,6 @@ jobs:
     if: >
       always() && !failure() && !cancelled() &&
       ( needs.linux_emulation.result == 'success' || needs.linux_crossbuild.result == 'success' || needs.windows.result == 'success' || needs.osx.result == 'success' ) &&
-      !contains(needs.*.result, 'failure') &&
       needs.scheduled_defaults.outputs.artifacts_only == 'false' &&
       needs.skip_duplicate_job.outputs.should_skip != 'true'
     permissions:
@@ -269,7 +268,6 @@ jobs:
     if: >
       always() && !failure() && !cancelled() &&
       ( needs.linux_emulation.result == 'success' || needs.linux_crossbuild.result == 'success' ) &&
-      !contains(needs.*.result, 'failure') &&
       needs.scheduled_defaults.outputs.linux == 'false' &&
       needs.scheduled_defaults.outputs.artifacts_only == 'false' &&
       needs.skip_duplicate_job.outputs.should_skip != 'true'

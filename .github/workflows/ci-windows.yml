@@ -94,7 +94,7 @@ jobs:
 
       - name: Set tag env to output
         id: release_tags
-        run: Add-Content -Path $env:GITHUB_OUTPUT -Value "release_tag=$release_tag"
+        run: Add-Content -Path $env:GITHUB_OUTPUT -Value "release_tag=$env:release_tag"
 
       - name: "Release - Create artifacts"
         if: inputs.artifacts_only == 'false'
