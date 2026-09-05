@@ -64,6 +64,10 @@ sed -i 's|usr/bin/openssl\.exe|usr/local/bin/openssl.exe|g' openssl.cygport
 sed -i 's|rm \${D}/usr/lib/lib{crypto,ssl}\.a|# &|' openssl.cygport
 sed -i '/chmod 0755 \${D}\/usr\/bin\/\*\.dll/d' openssl.cygport
 
+# 9. Skip doc/man page generation (pod2man) - cyginstall runs the full "make install",
+# which is the slow part under Cygwin's fork/exec overhead. install_sw/install_ssldirs only.
+sed -i 's|^\s*cyginstall\s*$|    make DESTDIR="${D}" install_sw install_ssldirs|' openssl.cygport
+
 echo "==> Starting cygport /usr/local static build pipeline with $CPU_CORES cores..."
 cygport openssl.cygport fetch prep compile install package
 
