@@ -69,6 +69,19 @@ sed -i '/^openssl_perl_SUMMARY=/d' openssl.cygport
 sed -i '/^openssl_perl_REQUIRES=/d' openssl.cygport
 sed -i '/^openssl_perl_CONTENTS=/,/^"/d' openssl.cygport
 
+# 10. No runtime package to own the etc/defaults + postinstall/preremove hooks anymore,
+# and CA.pl/tsget are already covered by the recursive etc/pki/tls/ CONTENTS entry, so drop
+# the relocation/registration steps rather than re-homing them (avoids orphaned manifest entries).
+sed -i '/rm \${D}\/etc\/pki\/tls\/\*\.cnf\.dist/d' openssl.cygport
+sed -i '/make_etc_defaults/d' openssl.cygport
+sed -i '/mv \${D}\/etc\/pki\/tls\/misc\/{CA\.pl,tsget}/d' openssl.cygport
+sed -i '/rm \${D}\/etc\/pki\/tls\/misc\/tsget\.pl/d' openssl.cygport
+
+# 11. c_rehash installs straight to usr/bin (unaffected by the mv above) and was previously
+# excluded here in favour of the now-removed openssl-perl package - claim it explicitly instead.
+sed -i '/--exclude=CA\.pl\* --exclude=c_rehash\* --exclude=tsget\* --exclude=html/d' openssl.cygport
+sed -i 's|usr/bin/openssl\.exe|usr/bin/openssl.exe\n  usr/bin/c_rehash|' openssl.cygport
+
 echo "==> Starting cygport static build pipeline with $CPU_CORES cores..."
 cygport openssl.cygport fetch prep compile install package
 
