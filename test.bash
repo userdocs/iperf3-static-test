@@ -7,14 +7,14 @@ REPO_DIR="openssl"
 
 echo "==> Cloning Cygwin OpenSSL repository (with submodules)..."
 if [ ! -d "$REPO_DIR" ]; then
-    git clone --recurse-submodules https://cygwin.com/git/cygwin-packages/openssl.git "$REPO_DIR"
+	git clone --recurse-submodules https://cygwin.com/git/cygwin-packages/openssl.git "$REPO_DIR"
 else
-    echo "Directory $REPO_DIR already exists. Pulling latest changes..."
-    cd "$REPO_DIR"
-    git checkout -- .
-    git pull
-    git submodule update --init --recursive
-    cd ..
+	echo "Directory $REPO_DIR already exists. Pulling latest changes..."
+	cd "$REPO_DIR"
+	git checkout -- .
+	git pull
+	git submodule update --init --recursive
+	cd ..
 fi
 
 cd "$REPO_DIR"
@@ -32,7 +32,7 @@ CPU_CORES=$(nproc)
 sed -i 's|.*MAKEOPTS+=.*|MAKEOPTS+=" -j'"$CPU_CORES"'"|g' openssl.cygport
 
 # 3. Switch build configuration to fully static and target /usr/local
-sed -i 's/\<shared\>/no-shared no-dso no-comp/g' openssl.cygport
+sed -i 's/shared Cygwin/no-shared no-dso no-comp Cygwin/' openssl.cygport
 sed -i 's|--prefix=/usr|--prefix=/usr/local|g' openssl.cygport
 
 # 4. Remove libssl3 from PKG_NAMES and clean up any orphaned runtime blocks if present
@@ -49,8 +49,6 @@ sed -i '/libssl\.dll\.a/d' openssl.cygport
 
 # 6. Adjust devel package contents paths to match /usr/local layout
 sed -i 's|usr/include/openssl/|usr/local/include/openssl/\n  usr/local/lib/libcrypto.a\n  usr/local/lib/libssl.a|' openssl.cygport
-sed -i 's|usr/lib/libcrypto\.a|# &|' openssl.cygport # Prevent duplicates if re-run
-sed -i 's|usr/lib/libssl\.a|# &|' openssl.cygport
 
 # Fix other paths in devel package to point to usr/local
 sed -i 's|usr/lib/cmake/\*|usr/local/lib/cmake/*|g' openssl.cygport
@@ -63,10 +61,17 @@ sed -i 's|usr/bin/openssl\.exe|usr/local/bin/openssl.exe|g' openssl.cygport
 # 8. Ensure static libraries are not deleted in src_install() and clean up any old dll chmod commands
 sed -i 's|rm \${D}/usr/lib/lib{crypto,ssl}\.a|# &|' openssl.cygport
 sed -i '/chmod 0755 \${D}\/usr\/bin\/\*\.dll/d' openssl.cygport
+sed -i '/# install_runtime_libs mistakenly uses 0644/d' openssl.cygport
 
 # 9. Skip doc/man page generation (pod2man) - cyginstall runs the full "make install",
 # which is the slow part under Cygwin's fork/exec overhead. install_sw/install_ssldirs only.
 sed -i 's|^\s*cyginstall\s*$|    make DESTDIR="${D}" install_sw install_ssldirs|' openssl.cygport
+
+# 10. Man pages are no longer generated, so drop their now-dangling CONTENTS entries
+# (tar treats these as required paths and fails the packaging step if they're missing).
+sed -i '/usr\/share\/man\/man\[157\]/d' openssl.cygport
+sed -i '/usr\/local\/share\/man\/man3\//d' openssl.cygport
+sed -i '/usr\/share\/man\/man1\/\(CA\.pl\|c_rehash\|tsget\)\.1\*/d' openssl.cygport
 
 echo "==> Starting cygport /usr/local static build pipeline with $CPU_CORES cores..."
 cygport openssl.cygport fetch prep compile install package
