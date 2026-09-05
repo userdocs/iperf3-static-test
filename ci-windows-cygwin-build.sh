@@ -49,7 +49,8 @@ if [[ ${with_openssl} == 'yes' ]]; then
 
 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring openssl"
 	pushd "${HOME}/openssl" || exit 1
-	./config --prefix="${cygwin_path}" --libdir=lib threads no-shared no-dso no-comp
+	./config --prefix="${cygwin_path}" --libdir=lib threads no-shared no-dso no-comp zlib \
+		--with-zlib-lib="${cygwin_path}/lib" --with-zlib-include="${cygwin_path}/include"
 
 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building openssl"
 	make -j"$(nproc)"
@@ -82,7 +83,8 @@ if [[ ${with_openssl} == 'yes' ]]; then
 	# override, so the extra lib has to ride in via LIBS instead (it gets appended
 	# after OPENSSL_LIBS by the macro: LIBS="$OPENSSL_LIBS $LIBS").
 	# static openssl 3.5+ pulls in the windows cert store (winstore_store.c), which needs crypt32
-	LIBS="-lcrypt32" ./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
+	# static openssl was built with zlib support, so the static libz.a needs to ride along too
+	LIBS="-lcrypt32 -lz" ./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
 else
 	./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
 fi
