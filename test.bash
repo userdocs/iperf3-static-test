@@ -22,7 +22,7 @@ cd "$REPO_DIR"
 echo "==> Cleaning any previous builds..."
 cygport openssl.cygport clean || true
 
-echo "==> Modifying openssl.cygport for v$TARGET_VERSION (Fully Static Build in /usr/local)..."
+echo "==> Modifying openssl.cygport for v$TARGET_VERSION (Fully Static Build)..."
 
 # 1. Bump the version
 sed -i "s/^VERSION=.*/VERSION=$TARGET_VERSION/" openssl.cygport
@@ -32,7 +32,7 @@ CPU_CORES=$(nproc)
 sed -i "s|.*MAKEOPTS+=.*|MAKEOPTS=\"-j$CPU_CORES\"|g" openssl.cygport
 
 # 3. Switch prefix to /usr/local and configuration to fully static
-sed -i 's|--prefix=/usr|--prefix=/usr/local|g' openssl.cygport
+# sed -i 's|--prefix=/usr|--prefix=/usr/local|g' openssl.cygport
 sed -i 's/shared Cygwin/no-shared no-dso no-comp Cygwin/' openssl.cygport
 
 # 4. Remove logic for dynamic libraries and static library deletion
@@ -41,7 +41,7 @@ sed -i '/chmod 0755 \${D}\/usr\/bin\/\*\.dll/d' openssl.cygport
 sed -i '/# install_runtime_libs mistakenly uses 0644/d' openssl.cygport
 
 # 5. Fix hardcoded /usr/bin for the new /usr/local prefix
-sed -i 's|\${D}/usr/bin|\${D}/usr/local/bin|g' openssl.cygport
+# sed -i 's|\${D}/usr/bin|\${D}/usr/local/bin|g' openssl.cygport
 
 # 6. Skip doc/man page generation (cyginstall runs full make install)
 sed -i 's|^\s*cyginstall\s*$|    make DESTDIR="${D}" install_sw install_ssldirs|' openssl.cygport

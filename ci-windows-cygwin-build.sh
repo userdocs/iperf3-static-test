@@ -76,7 +76,6 @@ sed -rn 's|(.*)\[(.*)],\[https://github.com/esnet/iperf],(.*)|\2|p' configure.ac
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m Bootstrapping iperf3"
 
 ./bootstrap.sh
-
 ./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
 
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m make"
