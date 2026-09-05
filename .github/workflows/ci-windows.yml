@@ -61,8 +61,11 @@ jobs:
         run: .\ci-cygwin-installer.cmd
 
       - name: Build static
+        if: ${{ matrix.build == 'basic' }}
+        run: .\cygwin\bin\bash.exe -l test.bash
 
-        run: .\cygwin\bin\bash.exe -l ci-windows-cygwin-build.sh "${{ matrix.openssl }}" "$env:cygwin_path" "$env:source_repo" "$env:source_branch"
+      - name: Build static
+        run: .\cygwin\bin\bash.exe -l ci-windows-cygwin-build.sh "no" "$env:cygwin_path" "$env:source_repo" "$env:source_branch"
 
       # - name: VirusTotal Scan
       #   id: virustotal
