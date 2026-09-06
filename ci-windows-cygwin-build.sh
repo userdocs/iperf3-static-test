@@ -117,7 +117,7 @@ printf '%b\n\n' " \e[94m\U25cf\e[0m Repo Info"
 git remote show origin
 
 printf '\n%b\n' " \e[92m\U25cf\e[0m Setting iperf3 version to file iperf3_version"
-sed -rn 's|(.*)\[(.*)],\[https://github.com/esnet/iperf],(.*)|\2|p' configure.ac >"$HOME/iperf3_version"
+sed -rn 's|(.*)\[(.*)],\[https://github.com/esnet/iperf],(.*)|\2|p' configure.ac > "$HOME/iperf3_version"
 
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m Bootstrapping iperf3"
 
