@@ -20,44 +20,90 @@ printf '\n%b\n' " \e[93m\U25cf\e[0m cygwin_path = ${cygwin_path}"
 printf '\n%b\n' " \e[93m\U25cf\e[0m source_repo = ${source_repo}"
 printf '\n%b\n' " \e[93m\U25cf\e[0m source_branch = ${source_branch}"
 
-# if [[ ${with_openssl} == 'yes' ]]; then
-# 	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading zlib"
-# 	curl -sLO "https://github.com/userdocs/qbt-workflow-files/releases/latest/download/zlib.tar.xz"
+if [[ ${with_openssl} == 'yes' ]]; then
+	# openssl via cygport
+	REPO_DIR="$HOME/openssl"
 
-# 	openssl_version="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl-3\.5\./{sub("refs/tags/", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+	echo "==> Cloning Cygwin OpenSSL repository (with submodules)..."
+	if [ ! -d "$REPO_DIR" ]; then
+		git clone --recurse-submodules https://cygwin.com/git/cygwin-packages/openssl.git "$REPO_DIR"
+		pushd "$REPO_DIR" || exit 1
+	else
+		echo "Directory $REPO_DIR already exists. Pulling latest changes..."
+		pushd "$REPO_DIR" || exit 1
+		git checkout -- .
+		git pull
+		git submodule update --init --recursive
+	fi
 
-# 	printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading openssl ${openssl_version}"
-# 	curl -sLO "https://github.com/openssl/openssl/releases/download/${openssl_version}/${openssl_version}.tar.gz"
+	echo "==> Cleaning any previous builds..."
 
-# 	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting zlib"
-# 	rm -rf "zlib" && mkdir -p "zlib"
-# 	tar xf "zlib.tar.xz" --strip-components=1 -C "zlib"
+	# 1. Bootstrapping
+	cygport openssl.cygport clean || true
 
-# 	printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting openssl"
-# 	rm -rf "openssl" && mkdir -p "openssl"
-# 	tar xf "${openssl_version}.tar.gz" --strip-components=1 -C "openssl"
+	echo "==> Modifying openssl.cygport (Fully Static Build)..."
 
-# 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring zlib"
-# 	pushd "zlib" || exit 1
-# 	./configure --prefix="${cygwin_path}" --static
+	# 2. Adjust MAKEOPTS for available cores
+	CPU_CORES=$(nproc)
+	sed -i "s|.*MAKEOPTS+=.*|MAKEOPTS=\"-j$CPU_CORES\"|g" openssl.cygport
 
-# 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building with zlib"
-# 	make -j"$(nproc)"
-# 	make install
+	# 3. Switch configuration to fully static
+	sed -i 's/shared Cygwin/no-shared no-dso no-comp Cygwin/' openssl.cygport
 
-# 	popd || exit 1
+	# 4. Remove logic for dynamic libraries and static library deletion
+	# shellcheck disable=SC2016
+	sed -i '/rm \${D}\/usr\/lib\/lib{crypto,ssl}\.a/d' openssl.cygport
 
-# 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring openssl"
-# 	pushd "${HOME}/openssl" || exit 1
-# 	./config --prefix="${cygwin_path}" --libdir=lib threads no-shared no-dso no-comp zlib \
-# 		--with-zlib-lib="${cygwin_path}/lib" --with-zlib-include="${cygwin_path}/include"
+	# 5. Skip doc/man page generation (cyginstall runs full make install)
+	# shellcheck disable=SC2016
+	sed -i 's|^\s*cyginstall\s*$|    make DESTDIR="${D}" install_sw install_ssldirs|' openssl.cygport
 
-# 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building openssl"
-# 	make -j"$(nproc)"
-# 	make install_sw
+	echo "==> Starting cygport static build pipeline with $CPU_CORES cores..."
+	cygport openssl.cygport fetch prep compile install
 
-# 	popd || exit 1
-# fi
+	echo "==> Automatically installing files to /..."
+	cp -a openssl-*/inst/* /
+
+	echo "==> Success! OpenSSL built and installed locally."
+
+	# openssl via github source + configure + make
+	# printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading zlib"
+	# curl -sLO "https://github.com/userdocs/qbt-workflow-files/releases/latest/download/zlib.tar.xz"
+
+	# openssl_version="$(git ls-remote -q -t --refs "https://github.com/openssl/openssl.git" | awk '/openssl-3\.5\./{sub("refs/tags/", "");sub("(.*)(v6|rc|alpha|beta)(.*)", ""); print $2 }' | awk '!/^$/' | sort -rV | head -n1)"
+
+	# printf '\n%b\n' " \e[94m\U25cf\e[0m Downloading openssl ${openssl_version}"
+	# curl -sLO "https://github.com/openssl/openssl/releases/download/${openssl_version}/${openssl_version}.tar.gz"
+
+	# printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting zlib"
+	# rm -rf "zlib" && mkdir -p "zlib"
+	# tar xf "zlib.tar.xz" --strip-components=1 -C "zlib"
+
+	# printf '\n%b\n' " \e[94m\U25cf\e[0m Extracting openssl"
+	# rm -rf "openssl" && mkdir -p "openssl"
+	# tar xf "${openssl_version}.tar.gz" --strip-components=1 -C "openssl"
+
+	# printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring zlib"
+	# pushd "zlib" || exit 1
+	# ./configure --prefix="${cygwin_path}" --static
+
+	# printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building with zlib"
+	# make -j"$(nproc)"
+	# make install
+
+	# popd || exit 1
+
+	# printf '\n%b\n\n' " \e[94m\U25cf\e[0m Configuring openssl"
+	# pushd "${HOME}/openssl" || exit 1
+	# ./config --prefix="${cygwin_path}" --libdir=lib threads no-shared no-dso no-comp zlib \
+	# 	--with-zlib-lib="${cygwin_path}/lib" --with-zlib-include="${cygwin_path}/include"
+
+	# printf '\n%b\n\n' " \e[94m\U25cf\e[0m Building openssl"
+	# make -j"$(nproc)"
+	# make install_sw
+
+	popd || exit 1
+fi
 
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m Cloning iperf3 git repo"
 
@@ -71,7 +117,7 @@ printf '%b\n\n' " \e[94m\U25cf\e[0m Repo Info"
 git remote show origin
 
 printf '\n%b\n' " \e[92m\U25cf\e[0m Setting iperf3 version to file iperf3_version"
-sed -rn 's|(.*)\[(.*)],\[https://github.com/esnet/iperf],(.*)|\2|p' configure.ac > "$HOME/iperf3_version"
+sed -rn 's|(.*)\[(.*)],\[https://github.com/esnet/iperf],(.*)|\2|p' configure.ac >"$HOME/iperf3_version"
 
 printf '\n%b\n\n' " \e[94m\U25cf\e[0m Bootstrapping iperf3"
 

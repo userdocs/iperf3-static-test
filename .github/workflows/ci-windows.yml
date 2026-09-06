@@ -60,10 +60,6 @@ jobs:
       - name: Install ci-cygwin-installer.cmd
         run: .\ci-cygwin-installer.cmd
 
-      - name: Build openssl via cygport
-        if: ${{ matrix.build == 'openssl' }}
-        run: .\cygwin\bin\bash.exe -l test.bash
-
       - name: Build iperf3 statically linked
         run: .\cygwin\bin\bash.exe -l ci-windows-cygwin-build.sh "${{ matrix.openssl }}" "$env:cygwin_path" "$env:source_repo" "$env:source_branch"
 

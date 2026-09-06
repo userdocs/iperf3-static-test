@@ -31,9 +31,11 @@ sed -i "s|.*MAKEOPTS+=.*|MAKEOPTS=\"-j$CPU_CORES\"|g" openssl.cygport
 sed -i 's/shared Cygwin/no-shared no-dso no-comp Cygwin/' openssl.cygport
 
 # 4. Remove logic for dynamic libraries and static library deletion
+# shellcheck disable=SC2016
 sed -i '/rm \${D}\/usr\/lib\/lib{crypto,ssl}\.a/d' openssl.cygport
 
 # 5. Skip doc/man page generation (cyginstall runs full make install)
+# shellcheck disable=SC2016
 sed -i 's|^\s*cyginstall\s*$|    make DESTDIR="${D}" install_sw install_ssldirs|' openssl.cygport
 
 echo "==> Starting cygport static build pipeline with $CPU_CORES cores..."
