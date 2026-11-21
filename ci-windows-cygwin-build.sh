@@ -103,6 +103,8 @@ if [[ ${only_apps} == "only_iperf3" ]]; then
 		./configure --disable-shared --enable-static --enable-static-bin --prefix="$HOME/iperf3"
 	fi
 
+	cat "$HOME/iperf3_build/config.log"
+
 	printf '\n%b\n\n' " \e[94m\U25cf\e[0m make"
 	make -j"$(nproc)"
 
