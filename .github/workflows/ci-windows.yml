@@ -68,7 +68,7 @@ jobs:
         run: .\cygwin\bin\bash.exe -l ci-windows-cygwin-build.sh "${{ matrix.openssl }}" "$env:cygwin_path" "$env:source_repo" "$env:source_branch" "only_iperf3"
 
       - name: debug
-        run: cat config.log
+        run: cat ~/iperf3_build/config.log
 
       # - name: VirusTotal Scan
       #   id: virustotal
