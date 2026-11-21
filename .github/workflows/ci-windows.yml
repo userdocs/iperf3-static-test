@@ -67,9 +67,6 @@ jobs:
       - name: Build iperf3 statically linked
         run: .\cygwin\bin\bash.exe -l ci-windows-cygwin-build.sh "${{ matrix.openssl }}" "$env:cygwin_path" "$env:source_repo" "$env:source_branch" "only_iperf3"
 
-      - name: debug
-        run: cat "$HOME/iperf3_build/config.log"
-
       # - name: VirusTotal Scan
       #   id: virustotal
       #   uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2 # v5.0.0
