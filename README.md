@@ -12,7 +12,7 @@ The only resource providing multiplatform distro independent iperf3 latest relea
 - [Zizmor workflow auditing](https://github.com/woodruffw/zizmor) - helping ensure the worklow itself is not poisoned.
 - Powerful build system with ability to specify repo and branches to easily build patches or custom builds.
 
-![](.github/assets/images/inputs.png)
+![inputs](.github/assets/images/inputs.png)
 
 ## Build Platforms
 
@@ -34,7 +34,7 @@ Windows:
 - Arch: `amd64`
 - Docker: no
 - Static binaries: yes
-- Openssl 3.0.x LTS (2026-09-07) - LTS Releases after this don't work with cygwin / iperf3 for windows builds.
+- Openssl via cygports - <https://cygwin.com/packages/summary/openssl.html>
 
 MacOS:
 

@@ -85,7 +85,7 @@ jobs:
         run: Compress-Archive -Path "${{ matrix.name }}/bin/*" -DestinationPath "${{ matrix.name }}-${{ matrix.arch }}-win${{ matrix.filename }}.zip"
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: |
             ${{ matrix.name }}-${{ matrix.arch }}-win${{ matrix.filename }}.zip
@@ -101,7 +101,7 @@ jobs:
 
       - name: "Release - Create artifacts"
         if: inputs.artifacts_only == 'false'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: "${{ matrix.name }}-amd64-win${{ matrix.filename }}"
           path: |
@@ -110,7 +110,7 @@ jobs:
 
       - name: "Dev - Create artifacts"
         if: inputs.artifacts_only == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: "${{ matrix.name }}-amd64-win${{ matrix.filename }}"
           path: "${{ matrix.name }}"
